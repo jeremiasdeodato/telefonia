@@ -1,5 +1,4 @@
 defmodule Assinante do
-
   defstruct nome: nil, numero: nil, cpf: nil, plano: nil
 
   @assinantes %{:prepago => "pre.txt", :pospago => "pos.txt"}
@@ -8,7 +7,7 @@ defmodule Assinante do
   defp buscar(numero, :prepago), do: filtro(assinantes_prepago(), numero)
   defp buscar(numero, :pospago), do: filtro(assinantes_pospago(), numero)
   defp buscar(numero, :all), do: filtro(assinantes(), numero)
-  defp filtro(lista, numero), do: Enum.find(lista,&(&1.numero == numero))
+  defp filtro(lista, numero), do: Enum.find(lista, &(&1.numero == numero))
 
   def assinantes(), do: read(:prepago) ++ read(:pospago)
   def assinantes_prepago(), do: read(:prepago)
@@ -20,7 +19,9 @@ defmodule Assinante do
         (read(plano) ++ [%__MODULE__{nome: nome, numero: numero, cpf: cpf, plano: plano}])
         |> :erlang.term_to_binary()
         |> write(plano)
+
         {:ok, "Assinante #{nome} cadastrado com sucesso!"}
+
       _assinante ->
         {:error, "Assinante com este número cadastrado!"}
     end
@@ -31,13 +32,13 @@ defmodule Assinante do
   end
 
   def read(plano) do
-    case  File.read(@assinantes[plano]) do
+    case File.read(@assinantes[plano]) do
       {:ok, assinantes} ->
         assinantes
         |> :erlang.binary_to_term()
 
-        {:error, :ennoent} ->
-          {:error, "Arquivo inválido"}
+      {:error, :ennoent} ->
+        {:error, "Arquivo inválido"}
     end
   end
 end

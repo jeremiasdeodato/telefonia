@@ -5,7 +5,7 @@ defmodule Assinante do
   A funcao mais utlizada e a funcao `cadastrar/4`
   """
 
-  defstruct nome: nil, numero: nil, cpf: nil, plano: nil
+  defstruct nome: nil, numero: nil, cpf: nil, plano: nil, chamadas: []
 
   @assinantes %{:prepago => "pre.txt", :pospago => "pos.txt"}
 
@@ -41,13 +41,15 @@ defmodule Assinante do
   """
   def cadastrar(nome, numero, cpf, :prepago), do: cadastrar(nome, numero, cpf, %Prepago{})
   def cadastrar(nome, numero, cpf, :pospago), do: cadastrar(nome, numero, cpf, %Pospago{})
+
   def cadastrar(nome, numero, cpf, plano) do
     case buscar_assinante(numero) do
       nil ->
         assinante = %__MODULE__{nome: nome, numero: numero, cpf: cpf, plano: plano}
-        (read(pegar_plano(assinante)) ++ [assinante])
+
+        (read(pega_plano(assinante)) ++ [assinante])
         |> :erlang.term_to_binary()
-        |> write(pegar_plano(assinante))
+        |> write(pega_plano(assinante))
 
         {:ok, "Assinante #{nome} cadastrado com sucesso!"}
 
@@ -56,7 +58,21 @@ defmodule Assinante do
     end
   end
 
-  defp pegar_plano(assinante) do
+  def atualizar(numero, assinante) do
+    {assinante_antigo, nova_lista} = deletar_item(numero)
+
+    case assinante.plano.__struct__ == assinante_antigo.plano.__struct__ do
+      true ->
+        (nova_lista ++ [assinante])
+        |> :erlang.term_to_binary()
+        |> write(pega_plano(assinante))
+
+      false ->
+        {:error, "Assinante nao pode alterar o plano"}
+    end
+  end
+
+  defp pega_plano(assinante) do
     case assinante.plano.__struct__ == Prepago do
       true -> :prepago
       false -> :pospago
@@ -68,13 +84,20 @@ defmodule Assinante do
   end
 
   def deletar(numero) do
-    assinante = buscar_assinante(numero)
+    {assinante, nova_lista} = deletar_item(numero)
 
-    result_delete = assinantes()
-    |> List.delete(assinante)
+    nova_lista
     |> :erlang.term_to_binary()
     |> write(assinante.plano)
-    {result_delete, "Assinante #{assinante.nome} deletado!"}
+    {:ok, "Assinante #{assinante.nome} deletado!"}
+  end
+
+  def deletar_item(numero) do
+    assinante = buscar_assinante(numero)
+
+    nova_lista = read(pega_plano(assinante))
+    |> List.delete(assinante)
+    {assinante, nova_lista}
   end
 
   def read(plano) do

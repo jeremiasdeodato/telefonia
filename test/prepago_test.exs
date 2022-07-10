@@ -17,14 +17,14 @@ defmodule PrepagoTest do
       Assinante.cadastrar("Jeremias", "123", "123", :prepago)
 
       assert Prepago.fazer_chamada("123", DateTime.utc_now(), 3) ==
-        {:ok, "A chamada custou 4.35, e voce tem 5.65 de creditos"}
+               {:ok, "A chamada custou 4.35, e voce tem 5.65 de creditos"}
     end
 
     test "fazer uma ligacao longa e nao tem credito" do
       Assinante.cadastrar("Jeremias", "123", "123", :prepago)
 
       assert Prepago.fazer_chamada("123", DateTime.utc_now(), 10) ==
-        {:error, "Voce nao tem creditos para fazer a ligacao, faca uma recarga"}
+               {:error, "Voce nao tem creditos para fazer a ligacao, faca uma recarga"}
     end
   end
 end

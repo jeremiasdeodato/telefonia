@@ -1,4 +1,10 @@
 defmodule Assinante do
+  @moduledoc """
+  Modulo de assinante para cadastro de tipos de assinantes como `prepago` e `pospago`
+
+  A funcao mais utlizada e a funcao `cadastrar/4`
+  """
+
   defstruct nome: nil, numero: nil, cpf: nil, plano: nil
 
   @assinantes %{:prepago => "pre.txt", :pospago => "pos.txt"}
@@ -13,6 +19,26 @@ defmodule Assinante do
   def assinantes_prepago(), do: read(:prepago)
   def assinantes_pospago(), do: read(:pospago)
 
+  @spec cadastrar(any, any, any, any) :: {:error, <<_::304>>} | {:ok, <<_::64, _::_*8>>}
+  @doc """
+  Funcao para cadastrar assinante seja ele `prepago` e `pospago`
+
+  ## Parametros da Funcao
+
+  - nome: parametro do nome do assinante
+  - numero: numero unico e caso exista pode retornar um erro
+  - cpf: parametro de assinante
+  - plano: opcional e caso nao seja informado sera cadastrado um assinante `prepago`
+
+  ## Informacoes Adicionais
+
+  - caso o numero ja exista ele exibira uma mensagem de erro
+
+  ## Exemplo
+
+      iex> Assinante.cadastrar("Joao", "123123", "123123")
+      {:ok, "Assinante Joao cadastrado com sucesso!"}
+  """
   def cadastrar(nome, numero, cpf, plano \\ :prepago) do
     case buscar_assinante(numero) do
       nil ->
@@ -29,6 +55,16 @@ defmodule Assinante do
 
   defp write(lista_assinantes, plano) do
     File.write!(@assinantes[plano], lista_assinantes)
+  end
+
+  def deletar(numero) do
+    assinante = buscar_assinante(numero)
+
+    result_delete = assinantes()
+    |> List.delete(assinante)
+    |> :erlang.term_to_binary()
+    |> write(assinante.plano)
+    {result_delete, "Assinante #{assinante.nome} deletado!"}
   end
 
   def read(plano) do

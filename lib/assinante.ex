@@ -89,14 +89,17 @@ defmodule Assinante do
     nova_lista
     |> :erlang.term_to_binary()
     |> write(assinante.plano)
+
     {:ok, "Assinante #{assinante.nome} deletado!"}
   end
 
   def deletar_item(numero) do
     assinante = buscar_assinante(numero)
 
-    nova_lista = read(pega_plano(assinante))
-    |> List.delete(assinante)
+    nova_lista =
+      read(pega_plano(assinante))
+      |> List.delete(assinante)
+
     {assinante, nova_lista}
   end
 

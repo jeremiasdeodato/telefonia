@@ -21,4 +21,8 @@ defmodule RecargaTest do
     assert assinante.plano.creditos == 30
     assert Enum.count(assinante.plano.recargas) == 1
   end
+
+  test "deve retornar estrutura de recarga" do
+    assert %Recarga{data: DateTime.utc_now(), valor: 10}
+  end
 end

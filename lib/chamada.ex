@@ -1,5 +1,4 @@
 defmodule Chamada do
-
   defstruct data: nil, duracao: nil
 
   def registrar(assinante, data, duracao) do
